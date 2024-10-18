@@ -9,12 +9,8 @@ int my_strlen(char *str) {
     int i=0;
     for(;*(str+i)!='\0';i++){;}
     return i;
-
-
     // IMPLEMENT YOUR CODE HERE
 }
-
-
 // 练习2，实现库函数strcat
 void my_strcat(char *str_1, char *str_2) {
     while(*str_1!='\0'){str_1++;}
@@ -36,10 +32,15 @@ void my_strcat(char *str_1, char *str_2) {
 
 // 练习3，实现库函数strstr
 char* my_strstr(char *s, char *p) {
-    for(int i=0;*(s+i)!='\0';i++){
-        if(*(s+i)==*p){return s+i;}
-        else{return 0;}
+    for(int i=0;*(s+i);i++){
+        if(*(s+i)==*p){
+            for(int j=0;*(s+i+j)!='\0'&&*(p+j)!='\0';j++){
+                if(*(s+i+j)!=*(p+j)){return nullptr;}
+                if(*(p+j+1)=='\0'){return s+i;}
+        }}
+        
     }
+    return nullptr;
     /**
      * 在字符串s中搜索字符串p，如果存在就返回第一次找到的地址，不存在就返回空指针(0)。
      * 例如：
@@ -123,7 +124,6 @@ void rgb2gray(float *in, float *out, int h, int w) {
 }
 
 // 练习5，实现图像处理算法 resize：缩小或放大图像
-void resize(float *in, float *out, int h, int w, int c, float scale) {
     /**
      * 图像处理知识：
      *  1.单线性插值法
@@ -219,34 +219,41 @@ void resize(float *in, float *out, int h, int w, int c, float scale) {
      *        所以需要对其进行边界检查
      */
 
+
+
+
+
+void resize(float *in, float *out, int h, int w, int c, float scale) {
     int new_h = h * scale, new_w = w * scale;
-    for(int y=1;y<=new_h;y++){
-        for(int x=1;x<=new_w;x++){
-            for(int k=1;k<=c;k++){
+    for(int y=0;y<new_h;y++){
+        for(int x=0;x<new_w;x++){
+            for(int k=0;k<c;k++){
               float x_ = x / scale;
                  float y_ = y / scale;
                  int x1 = static_cast<int>(x_);
                   int y1 = static_cast<int>(y_);
-                  if(x1 < 1) x1 = 1;
-                  if(y1 < 1) y1 = 1;
-                   float dx = x - x1;
-                   float dy = y - y1;
-                   float p1 = in[(y1-1)*w*c + (x1-1)*c + k-1];
-                   float p2 = in[(y1-1)*w*c + (x1)*c + k-1];
-                   float p3 = in[(y1)*w*c + (x1-1)*c + k-1];
-                   float p4 = in[(y1)*w*c + (x1)*c + k-1];
+                  if(x1 == -1) x1 = 0;
+                  if(y1 == -1) y1 = 0;
+                  if(x1 == w-1) x1 = w - 2;
+                  if(y1 == h-1) y1 = h - 2;
+                   float dx = x_ - x1;
+                   float dy = y_ - y1;
+                   float p1 = in[(y1+1)*w*c + (x1)*c + k];
+                   float p2 = in[(y1+1)*w*c + (x1+1)*c + k];
+                   float p3 = in[(y1)*w*c + (x1)*c + k];
+                   float p4 = in[(y1)*w*c + (x1+1)*c + k];
                    float q = p1 * (1 - dx) * (1 - dy) + p2 * dx * (1 - dy) + p3 * (1 - dx) * dy + p4 * dx * dy;
-                   out[(y-1)*new_w*c + (x-1)*c + k-1] = q;
+                   out[(y)*new_w*c + (x)*c + k] = q;
             }
         }
     }
+}
     // IMPLEMENT YOUR CODE HERE
 
-}
 
 
 // 练习6，实现图像处理算法：直方图均衡化
-void hist_eq(float *in, int h, int w) {
+void hist_eq(float *in,int h, int w) {
     /**
      * 将输入图片进行直方图均衡化处理。参数含义：
      * (1) float *in: 输入的灰度图片。
@@ -262,26 +269,23 @@ void hist_eq(float *in, int h, int w) {
      * (2) 灰度级个数为256，也就是{0, 1, 2, 3, ..., 255}
      * (3) 使用数组来实现灰度级 => 灰度级的映射
      */
-    //直方图均衡化不会，不知道要干嘛
+    //直方图均衡化
     float hist[256] = {0};
-    float cdf[256] = {0};
     for(int i=0;i<h;i++){
         for(int j=0;j<w;j++){
             hist[int(in[i*w+j])] += 1;
         }
-
     }
-    for(int i=0;i<256;i++){
-        cdf[i] = cdf[i-1] + hist[i];
+    for(int i=1;i<256;i++){
+        hist[i] += hist[i-1];
     }
     for(int i=0;i<h;i++){
         for(int j=0;j<w;j++){
-            in[i*w+j] = cdf[int(in[i*w+j])] / (h*w);
-        }
+            in[i*w+j] = hist[int(in[i*w+j])] / (h*w) * 255;
 
     }
 
 
-
     // IMPLEMENT YOUR CODE HERE
-}
+}}
+
