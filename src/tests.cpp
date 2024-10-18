@@ -1,18 +1,30 @@
 #include "tests.h"
-
+#include<iostream>
+using namespace std;
 // 练习1，实现库函数strlen
 int my_strlen(char *str) {
     /**
      * 统计字符串的长度，太简单了。
      */
+    int i=0;
+    for(;*(str+i)!='\0';i++){;}
+    return i;
+
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
 }
 
 
 // 练习2，实现库函数strcat
 void my_strcat(char *str_1, char *str_2) {
+    while(*str_1!='\0'){str_1++;}
+    while(*str_2!='\0'){
+        *str_1=*str_2;
+        str_1++;
+        str_2++;
+    }
+    *str_1='\0';
+  
     /**
      * 将字符串str_2拼接到str_1之后，我们保证str_1指向的内存空间足够用于添加str_2。
      * 注意结束符'\0'的处理。
@@ -24,6 +36,10 @@ void my_strcat(char *str_1, char *str_2) {
 
 // 练习3，实现库函数strstr
 char* my_strstr(char *s, char *p) {
+    for(int i=0;*(s+i)!='\0';i++){
+        if(*(s+i)==*p){return s+i;}
+        else{return 0;}
+    }
     /**
      * 在字符串s中搜索字符串p，如果存在就返回第一次找到的地址，不存在就返回空指针(0)。
      * 例如：
@@ -31,7 +47,6 @@ char* my_strstr(char *s, char *p) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
 }
 
 
@@ -76,6 +91,14 @@ char* my_strstr(char *s, char *p) {
 
 // 练习4，将彩色图片(rgb)转化为灰度图片
 void rgb2gray(float *in, float *out, int h, int w) {
+    for(int i=0;i<=w*h-1;i++){
+        float r=*(in+3*i);
+        float g=*(in+3*i+1);
+        float b=*(in+3*i+2);
+        float v=0.1140 * b  + 0.5870 * g + 0.2989 * r;
+        *(out+i)=v;
+        
+    }
     /**
      * 编写这个函数，将一张彩色图片转化为灰度图片。以下是各个参数的含义：
      * (1) float *in:  指向彩色图片对应的内存区域（或者说数组）首地址的指针。
@@ -197,6 +220,26 @@ void resize(float *in, float *out, int h, int w, int c, float scale) {
      */
 
     int new_h = h * scale, new_w = w * scale;
+    for(int y=1;y<=new_h;y++){
+        for(int x=1;x<=new_w;x++){
+            for(int k=1;k<=c;k++){
+              float x_ = x / scale;
+                 float y_ = y / scale;
+                 int x1 = static_cast<int>(x_);
+                  int y1 = static_cast<int>(y_);
+                  if(x1 < 1) x1 = 1;
+                  if(y1 < 1) y1 = 1;
+                   float dx = x - x1;
+                   float dy = y - y1;
+                   float p1 = in[(y1-1)*w*c + (x1-1)*c + k-1];
+                   float p2 = in[(y1-1)*w*c + (x1)*c + k-1];
+                   float p3 = in[(y1)*w*c + (x1-1)*c + k-1];
+                   float p4 = in[(y1)*w*c + (x1)*c + k-1];
+                   float q = p1 * (1 - dx) * (1 - dy) + p2 * dx * (1 - dy) + p3 * (1 - dx) * dy + p4 * dx * dy;
+                   out[(y-1)*new_w*c + (x-1)*c + k-1] = q;
+            }
+        }
+    }
     // IMPLEMENT YOUR CODE HERE
 
 }
@@ -219,6 +262,26 @@ void hist_eq(float *in, int h, int w) {
      * (2) 灰度级个数为256，也就是{0, 1, 2, 3, ..., 255}
      * (3) 使用数组来实现灰度级 => 灰度级的映射
      */
+    //直方图均衡化不会，不知道要干嘛
+    float hist[256] = {0};
+    float cdf[256] = {0};
+    for(int i=0;i<h;i++){
+        for(int j=0;j<w;j++){
+            hist[int(in[i*w+j])] += 1;
+        }
+
+    }
+    for(int i=0;i<256;i++){
+        cdf[i] = cdf[i-1] + hist[i];
+    }
+    for(int i=0;i<h;i++){
+        for(int j=0;j<w;j++){
+            in[i*w+j] = cdf[int(in[i*w+j])] / (h*w);
+        }
+
+    }
+
+
 
     // IMPLEMENT YOUR CODE HERE
 }
